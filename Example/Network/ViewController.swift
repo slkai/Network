@@ -13,7 +13,6 @@ class ViewController: UIViewController {
     
     // 返回JSON
     @IBAction func clickJSON(_ sender: UIButton) {
-        
         Network(delegate: self).responseJSON(endPoint: IssueDataSource(), success: { (json) in
             print(Thread.current)
             print(json)

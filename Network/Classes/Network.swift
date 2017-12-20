@@ -49,10 +49,32 @@ public enum ParametersEncoding {
     }
 }
 
+// MARK: Responsable
+public protocol Responsable {
+    
+}
+
+public protocol ObjectResponsable: Responsable {
+    
+}
+
+public protocol ArrayResponsable: Responsable {
+    
+}
+
+public protocol NextableResponsable: Responsable {
+    
+}
+
+
+class NetworkService {
+    
+}
+
 
 // MARK: NetworkDelegate
 public protocol NetworkDelegate: class {
-    
+    // TODO: 加一个修改endPoint的方法？
     func requestWillSetHeaders(headers: [String: String]?) -> [String: String]?
     func requestWillSetParameters(parameters:[String: Any]) -> [String: Any]
     func requestWillBegin(request: DataRequest) -> DataRequest                 // 即将开始发送请求
