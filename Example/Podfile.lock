@@ -1,0 +1,22 @@
+PODS:
+  - Alamofire (4.4.0)
+  - Network (0.1.0):
+    - Alamofire (= 4.4.0)
+    - ObjectMapper (~> 3.1)
+  - ObjectMapper (3.1.0)
+
+DEPENDENCIES:
+  - Network (from `../`)
+
+EXTERNAL SOURCES:
+  Network:
+    :path: ../
+
+SPEC CHECKSUMS:
+  Alamofire: dc44b1600b800eb63da6a19039a0083d62a6a62d
+  Network: ede42b40affbfedc864ae9e7c180acc0e321befd
+  ObjectMapper: 20505058f54e5c3ca69e1d6de9897d152a5369a6
+
+PODFILE CHECKSUM: 70e0e051f7280a3c59c3444938dafc821356fb53
+
+COCOAPODS: 1.4.0.beta.1

@@ -1,0 +1,120 @@
+//
+//  Network.swift
+//  Network
+//
+//  Created by Alan on 2017/12/20.
+//  Copyright © 2017年 Alan. All rights reserved.
+//
+
+import Foundation
+import Alamofire
+import ObjectMapper
+
+// FIXME: 外部import A, A import B, 如何让外部调用 B的API?
+public typealias HttpMethod = Alamofire.HTTPMethod
+public typealias Phrasable = ObjectMapper.Mappable
+public typealias DataRequest = Alamofire.DataRequest
+public typealias Map = ObjectMapper.Map
+
+// MARK: Requestable
+public protocol Requestable {
+    var URI: String {get}
+    var method: HttpMethod {get}
+    var headers: [String:String] {get}
+    var parameters: [String:Any] {get}
+    var cache: Bool {get}
+}
+
+
+// MARK: NetworkDelegate
+public protocol NetworkDelegate: class {
+    func requestWillBegin(request: DataRequest) -> DataRequest  // 即将开始发送请求
+    func requestWillSerialize(data: Data) -> Data               // 即将序列化成json
+    func requestWillConvertObject(json: [String: Any]) -> [String: Any]        // 即将转成模型
+    func dealWithModelsIfNeed()                                 // 对模型进行处理再返回
+}
+
+public class Network {
+
+    static let queue = DispatchQueue(label: "Network Handler Queue")
+    static let sessionManager: SessionManager = {
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = SessionManager.defaultHTTPHeaders
+        return SessionManager(configuration: configuration)
+    }()
+    
+    public weak var delegate: NetworkDelegate?
+    
+    public init(delegate: NetworkDelegate? = nil) {
+        self.delegate = delegate
+    }
+    
+    public func responseJSON(endPoint: Requestable, success: ((_ JSON: [String: Any]) -> Void)?, failure: ((_ error: Error) -> Void)?) {
+        
+        let request = Network.sessionManager.request(endPoint.URI, method: endPoint.method, parameters: endPoint.parameters, encoding: URLEncoding.default, headers: endPoint.headers)
+        let newRequest = delegate?.requestWillBegin(request: request) ?? request
+        newRequest.responseJSON(queue: Network.queue, options: .allowFragments) { (response) in
+            
+            // 返回JSON失败
+            guard response.error == nil else {
+                failure?(response.error!)
+                return
+            }
+            
+            // 返回的不是json
+            guard let json = response.value as? [String: Any] else {
+                failure?(NetworkError.serializeFail(desc: nil))
+                return
+            }
+            
+            success?(json)
+        }
+    }
+    
+    public func responseObject<T: Phrasable>(endPoint: Requestable, keyPath: String?, success: ((_ obj: T) -> Void)?, failure: ((_ error: Error) -> Void)?) {
+        
+        responseJSON(endPoint: endPoint, success: { (json) in
+            
+            var JSON: Any = json
+            if let keyPath = keyPath, keyPath.isEmpty == false {
+                guard let jsonObject = json[keyPath] else {
+                    failure?(NetworkError.phraseFail(desc: "Keypath error!"))
+                    return
+                }
+                JSON = jsonObject
+            }
+            
+            guard let object = Mapper<T>(context: nil, shouldIncludeNilValues: false).map(JSONObject: JSON) else {
+                failure?(NetworkError.phraseFail(desc: "Phrase Error!"))
+                return
+            }
+            
+            success?(object)
+            
+        }, failure: failure)
+        
+    }
+    
+    public func responseArray<T: Phrasable>(endPoint: Requestable, keyPath: String?, success: ((_ objs: [T]) -> Void)?, failure: ((_ error: Error) -> Void)?) {
+        
+        responseJSON(endPoint: endPoint, success: { (json) in
+            
+            var JSON: Any = json
+            if let keyPath = keyPath, keyPath.isEmpty == false {
+                guard let jsonObject = json[keyPath] else {
+                    failure?(NetworkError.phraseFail(desc: "Keypath error!"))
+                    return
+                }
+                JSON = jsonObject
+            }
+            
+            guard let objects = Mapper<T>(context: nil, shouldIncludeNilValues: false).mapArray(JSONObject: JSON) else {
+                failure?(NetworkError.phraseFail(desc: "Phrase Error!"))
+                return
+            }
+            success?(objects)
+            
+        }, failure: failure)
+        
+    }
+}
