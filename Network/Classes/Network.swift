@@ -67,12 +67,26 @@ public enum ParametersEncoding {
 
 // MARK: NetworkDelegate
 public protocol NetworkDelegate: class {
-    func requestWillBegin(request: DataRequest) -> DataRequest  // 即将开始发送请求
-    func requestWillSerialize(data: Data) -> Data               // 即将序列化成json
-    func requestWillConvertObject(json: [String: Any]) -> [String: Any]        // 即将转成模型
-    func dealWithModelsIfNeed()                                 // 对模型进行处理再返回
+    
+    func requestWillSetHeaders(headers: [String: String]?) -> [String: String]?
+    func requestWillSetParameters(parameters:[String: Any]) -> [String: Any]
+    func requestWillBegin(request: DataRequest) -> DataRequest                 // 即将开始发送请求
+    func requestWillPhrase(json: [String: Any]) -> [String: Any]               // 即将转成模型
+    func requestWillReturnModel<T:Phrasable>(data: T) -> T                     // 对模型进行处理再返回
+    func requestWillReturnArray<T:Phrasable>(data: [T]) -> [T]                 // 对模型数组进行处理再返回
 }
 
+public extension NetworkDelegate {
+    func requestWillSetHeaders(headers: [String: String]?) -> [String: String]? {return headers}
+    func requestWillSetParameters(parameters:[String: Any]) -> [String: Any] {return parameters}
+    func requestWillBegin(request: DataRequest) -> DataRequest {return request}
+    func requestWillPhrase(json: [String: Any]) -> [String: Any] {return json}
+    func requestWillReturnModel<T:Phrasable>(data: T) -> T {return data}
+    func requestWillReturnArray<T:Phrasable>(data: [T]) -> [T] {return data}
+}
+
+
+// MARK: Network
 public class Network {
 
     static let queue = DispatchQueue(label: "Network Handler Queue")
@@ -132,7 +146,6 @@ public class Network {
             success?(object)
             
         }, failure: failure)
-        
     }
     
     public func responseArray<T: Phrasable>(endPoint: Requestable, keyPath: String?, success: ((_ objs: [T]) -> Void)?, failure: ((_ error: Error) -> Void)?) {
@@ -155,6 +168,5 @@ public class Network {
             success?(objects)
             
         }, failure: failure)
-        
     }
 }

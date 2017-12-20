@@ -14,9 +14,8 @@ class ViewController: UIViewController {
     // 返回JSON
     @IBAction func clickJSON(_ sender: UIButton) {
         
-        let network = Network()
-        network.delegate = self
-        network.responseJSON(endPoint: IssueDataSource(), success: { (json) in
+        Network(delegate: self).responseJSON(endPoint: IssueDataSource(), success: { (json) in
+            print(Thread.current)
             print(json)
         }) { (error) in
             print(error)
@@ -25,9 +24,8 @@ class ViewController: UIViewController {
     
     // 返回模型
     @IBAction func clickModel(_ sender: UIButton) {
-        let network = Network()
-        network.delegate = self
-        network.responseObject(endPoint: IssueDataSource(), keyPath: nil, success: { (issue: Issue) in
+        Network(delegate: self).responseObject(endPoint: IssueDataSource(), keyPath: nil, success: { (issue: Issue) in
+            print(Thread.current)
             print(issue)
         }) { (error) in
             print(error)
@@ -36,9 +34,8 @@ class ViewController: UIViewController {
     
     // 返回模型数组
     @IBAction func clickModels(_ sender: UIButton) {
-        let network = Network()
-        network.delegate = self
-        network.responseArray(endPoint: IssuesDataSource(), keyPath: "issues", success: { (issues: [Issue]) in
+        Network(delegate: self).responseArray(endPoint: IssuesDataSource(), keyPath: "issues", success: { (issues: [Issue]) in
+            print(Thread.current)
             print(issues)
         }) { (error) in
             print(error)
@@ -50,25 +47,8 @@ class ViewController: UIViewController {
 
 
 extension ViewController: NetworkDelegate {
-    func requestWillConvertObject(json: [String : Any]) -> [String : Any] {
-        return json
-    }
-
-    func requestWillBegin(request: DataRequest) -> DataRequest {
-        return request
-    }
-
-    func requestWillSerialize(data: Data) -> Data {
-        return data
-    }
-
-    func requestWillConvertObject(json: [String : Any]) {
-
-    }
-
-    func dealWithModelsIfNeed() {
-
-    }
+    
+    
 }
 
 
