@@ -121,7 +121,9 @@ public class Network {
                 return
             }
             
-            success?(json)
+            OperationQueue.main.addOperation {
+                success?(json)
+            }
         }
     }
     
@@ -143,7 +145,9 @@ public class Network {
                 return
             }
             
-            success?(object)
+            OperationQueue.main.addOperation {
+                success?(object)
+            }
             
         }, failure: failure)
     }
@@ -165,7 +169,10 @@ public class Network {
                 failure?(NetworkError.phraseFail(desc: "Phrase Error!"))
                 return
             }
-            success?(objects)
+            
+            OperationQueue.main.addOperation {
+                success?(objects)
+            }
             
         }, failure: failure)
     }
