@@ -8,7 +8,7 @@
 
 import Foundation
 import Alamofire
-import ObjectMapper
+import ObjectMapper.Swift
 
 // FIXME: 外部import A, A import B, 如何让外部调用 B的API?
 public typealias HttpMethod = Alamofire.HTTPMethod
@@ -22,7 +22,46 @@ public protocol Requestable {
     var method: HttpMethod {get}
     var headers: [String:String] {get}
     var parameters: [String:Any] {get}
+    var encoding: ParametersEncoding {get}
     var cache: Bool {get}
+}
+
+public extension Requestable {
+    
+    var method: HttpMethod {
+        return .get
+    }
+    
+    var headers: [String:String] {
+        return [:]
+    }
+    
+    var parameters: [String:Any] {
+        return [:]
+    }
+    
+    // GET方式使用URLEncode, 其他方法使用JSONEncode
+    var encoding: ParametersEncoding {
+        return method == .get ? .url : .json
+    }
+    
+    var cache: Bool {
+        return false
+    }
+}
+
+public enum ParametersEncoding {
+    case url
+    case json
+    
+    var encoder: ParameterEncoding {
+        switch self {
+        case .url:
+            return URLEncoding.default
+        case .json:
+            return JSONEncoding.default
+        }
+    }
 }
 
 
@@ -51,8 +90,9 @@ public class Network {
     
     public func responseJSON(endPoint: Requestable, success: ((_ JSON: [String: Any]) -> Void)?, failure: ((_ error: Error) -> Void)?) {
         
-        let request = Network.sessionManager.request(endPoint.URI, method: endPoint.method, parameters: endPoint.parameters, encoding: URLEncoding.default, headers: endPoint.headers)
+        let request = Network.sessionManager.request(endPoint.URI, method: endPoint.method, parameters: endPoint.parameters, encoding: endPoint.encoding.encoder, headers: endPoint.headers)
         let newRequest = delegate?.requestWillBegin(request: request) ?? request
+        
         newRequest.responseJSON(queue: Network.queue, options: .allowFragments) { (response) in
             
             // 返回JSON失败

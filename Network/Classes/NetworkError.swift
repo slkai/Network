@@ -9,6 +9,7 @@
 import Foundation
 
 public enum NetworkError: Error {
+    case encodeFail(desc: String?)
     case requestFail(desc: String?)
     case serializeFail(desc: String?)
     case phraseFail(desc: String?)
