@@ -27,27 +27,14 @@ public protocol Requestable {
 }
 
 public extension Requestable {
-    
-    var method: HttpMethod {
-        return .get
-    }
-    
-    var headers: [String:String] {
-        return [:]
-    }
-    
-    var parameters: [String:Any] {
-        return [:]
-    }
-    
-    // GET方式使用URLEncode, 其他方法使用JSONEncode
+    var method: HttpMethod {return .get}
+    var headers: [String:String] {return [:]}
+    var parameters: [String:Any] {return [:]}
     var encoding: ParametersEncoding {
+        // GET方式使用URLEncode, 其他方法使用JSONEncode
         return method == .get ? .url : .json
     }
-    
-    var cache: Bool {
-        return false
-    }
+    var cache: Bool {return false}
 }
 
 public enum ParametersEncoding {
@@ -56,10 +43,8 @@ public enum ParametersEncoding {
     
     var encoder: ParameterEncoding {
         switch self {
-        case .url:
-            return URLEncoding.default
-        case .json:
-            return JSONEncoding.default
+        case .url: return URLEncoding.default
+        case .json: return JSONEncoding.default
         }
     }
 }
@@ -110,16 +95,10 @@ public class Network {
         newRequest.responseJSON(queue: Network.queue, options: .allowFragments) { (response) in
             
             // 返回JSON失败
-            guard response.error == nil else {
-                failure?(response.error!)
-                return
-            }
+            guard response.error == nil else {failure?(response.error!); return}
             
             // 返回的不是json
-            guard let json = response.value as? [String: Any] else {
-                failure?(NetworkError.serializeFail(desc: nil))
-                return
-            }
+            guard let json = response.value as? [String: Any] else {failure?(NetworkError.serializeFail(desc: nil)); return}
             
             OperationQueue.main.addOperation {
                 success?(json)
@@ -134,7 +113,7 @@ public class Network {
             var JSON: Any = json
             if let keyPath = keyPath, keyPath.isEmpty == false {
                 guard let jsonObject = json[keyPath] else {
-                    failure?(NetworkError.phraseFail(desc: "Keypath error!"))
+                    failure?(NetworkError.phraseFail(desc: "Keypath error!"));
                     return
                 }
                 JSON = jsonObject
