@@ -17,6 +17,7 @@
 		E7D03E381FEA3CE400DB2A0C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D03E371FEA3CE400DB2A0C /* ViewController.swift */; };
 		E7D03E3A1FEA3DA000DB2A0C /* Issue.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D03E391FEA3DA000DB2A0C /* Issue.swift */; };
 		E7D03E3C1FEA4EB600DB2A0C /* DataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D03E3B1FEA4EB600DB2A0C /* DataSource.swift */; };
+		E7E3935F1FEC9D0200745473 /* JRNetworkTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7E3935E1FEC9D0200745473 /* JRNetworkTest.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +51,7 @@
 		E7D03E371FEA3CE400DB2A0C /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		E7D03E391FEA3DA000DB2A0C /* Issue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Issue.swift; sourceTree = "<group>"; };
 		E7D03E3B1FEA4EB600DB2A0C /* DataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataSource.swift; sourceTree = "<group>"; };
+		E7E3935E1FEC9D0200745473 /* JRNetworkTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JRNetworkTest.swift; sourceTree = "<group>"; };
 		F8C774E7C91D0C1586DB416E /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -101,6 +103,7 @@
 				E7D03E371FEA3CE400DB2A0C /* ViewController.swift */,
 				E7D03E391FEA3DA000DB2A0C /* Issue.swift */,
 				E7D03E3B1FEA4EB600DB2A0C /* DataSource.swift */,
+				E7E3935E1FEC9D0200745473 /* JRNetworkTest.swift */,
 				E7D03E351FEA3CD800DB2A0C /* Main.storyboard */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				607FACDE1AFB9204008FA782 /* LaunchScreen.xib */,
@@ -381,6 +384,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E7D03E381FEA3CE400DB2A0C /* ViewController.swift in Sources */,
+				E7E3935F1FEC9D0200745473 /* JRNetworkTest.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 				E7D03E3C1FEA4EB600DB2A0C /* DataSource.swift in Sources */,
 				E7D03E3A1FEA3DA000DB2A0C /* Issue.swift in Sources */,

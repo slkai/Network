@@ -51,7 +51,7 @@ public enum ParametersEncoding {
 
 // MARK: Responsable
 public protocol Responsable {
-    
+    var keyPath: String? {get}
 }
 
 public protocol ObjectResponsable: Responsable {
@@ -110,7 +110,7 @@ public class Network {
     }
     
     public func responseJSON(endPoint: Requestable, success: ((_ JSON: [String: Any]) -> Void)?, failure: ((_ error: Error) -> Void)?) {
-        
+
         let request = Network.sessionManager.request(endPoint.URI, method: endPoint.method, parameters: endPoint.parameters, encoding: endPoint.encoding.encoder, headers: endPoint.headers)
         let newRequest = delegate?.requestWillBegin(request: request) ?? request
         
