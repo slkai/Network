@@ -5,27 +5,9 @@
 //  Created by Alan on 2018/7/31.
 //
 
-import ObjectMapper
 
-// MARK: Serializable
 public protocol Serializable {
     init?(json: Any)
-}
-
-extension Serializable where Self: Mappable {
-    public init?(json: Any) {
-        
-        guard let json = json as? [String: Any] else {
-            return nil
-        }
-        
-        typealias T = Self
-        if let object = Mapper<T>().map(JSON: json) {
-            self = object
-        } else {
-            return nil
-        }
-    }
 }
 
 extension Int: Serializable {
