@@ -8,14 +8,24 @@
 
 import Foundation
 import Network
+import ObjectMapper
 
-struct IssueDataSource: Requestable {
+
+extension Issue: Serializable {}
+
+struct IssueDataSource: Requestable, ModelResponsable {
+    
+    typealias T = Issue
+    
+    var keyPath: String? {
+        return nil
+    }
     
     var URI: String {
         return "http://jira.mooyoo.com.cn/rest/api/latest/issue/MJB-4742"
     }
     
-    var method: HttpMethod {
+    var method: HTTPMethod {
         return .get
     }
     
@@ -26,18 +36,21 @@ struct IssueDataSource: Requestable {
     var parameters: [String : Any] {
         return ["fields": "*navigable"]
     }
-    
-    var cache: Bool {
-        return false
-    }
 }
 
-struct IssuesDataSource: Requestable {
+struct IssuesDataSource: Requestable, ModelResponsable {
+    
+    typealias T = Issue
+    
+    var keyPath: String? {
+        return "issues"
+    }
+    
     var URI: String {
         return "http://jira.mooyoo.com.cn/rest/api/2/search"
     }
     
-    var method: HttpMethod {
+    var method: HTTPMethod {
         return .post
     }
     
@@ -49,10 +62,4 @@ struct IssuesDataSource: Requestable {
         let jql = "project in (MJB,BOSS) AND issuetype = 子任务 AND affectedVersion = 5.7"
         return ["jql": jql, "maxResults": "5"]
     }
-    
-    var cache: Bool {
-        return false
-    }
-    
-    
 }
