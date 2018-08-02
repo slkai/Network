@@ -99,85 +99,106 @@ public class Network: NetworkDelegate {
             self.delegate = delegate
         }        
     }
+}
+
+// MARK: 常用
+extension Network {
+    public func responseJSON(requestable: Requestable, responsable: Responsable? = nil, success: ((_ JSON: Any) -> Void)?, failure: ((_ error: Error) -> Void)?) {
+        response(requestable: requestable, responsable: responsable, success: { (json) in
+            OperationQueue.main.addOperation {
+                success?(json)
+            }
+        }, failure: failure)
+    }
     
-    public func responseJSON(requestable: Requestable, success: ((_ JSON: [String: Any]) -> Void)?, failure: ((_ error: Error) -> Void)?) {
-        
+    
+    public func responseObject<R: ModelResponsable>(requestable: Requestable, responsable: R, success: ((_ obj: R.T) -> Void)?, failure: ((_ error: Error) ->Void)?) {
+        response(requestable: requestable, responsable: responsable, success: { (json) in
+            guard let jsonObject = json as? [String: Any] else {
+                failure?(NetworkError.phraseFail(desc: "json is not in dictionary format!"))
+                return
+            }
+            guard let object = R.T(json: jsonObject) else {
+                failure?(NetworkError.phraseFail(desc: "Phrase Error!"))
+                return
+            }
+            OperationQueue.main.addOperation {
+                success?(object)
+            }
+        }, failure: failure)
+    }
+    
+    
+    public func responseArray<R: ModelResponsable>(requestable: Requestable, responsable: R, success: ((_ objs: [R.T]) -> Void)?, failure: ((_ error: Error) ->Void)?) {
+        response(requestable: requestable, responsable: responsable, success: { (json) in
+            guard let jsons = json as? Array<[String: Any]> else {
+                failure?(NetworkError.phraseFail(desc: "json is not in array format!"))
+                return
+            }
+            let objects = jsons.compactMap({R.T(json: $0)})
+            OperationQueue.main.addOperation {
+                success?(objects)
+            }
+        }, failure: failure)
+    }
+    
+    //    public func responseArray(requestable: Requestable,
+    //                              responsable: Responsable?,
+    //                              success: ((_ JSON: Array<[String: Any]>) -> Void)?,
+    //                              failure: ((_ error: Error) -> Void)?) {
+    //
+    //        response(requestable: requestable, responsable: responsable, success: { (json) in
+    //            guard let JSON = json as? Array<[String: Any]> else {
+    //                failure?(NetworkError.phraseFail(desc: "json is not an array"))
+    //                return
+    //            }
+    //            OperationQueue.main.addOperation {
+    //                success?(JSON)
+    //            }
+    //        }, failure: failure)
+    //    }
+    //
+    //
+    //    public func responseDictionary(requestable: Requestable,
+    //                                   responsable: Responsable?,
+    //                                   success: ((_ JSON: [String: Any]) -> Void)?,
+    //                                   failure: ((_ error: Error) -> Void)?) {
+    //
+    //        response(requestable: requestable, responsable: responsable, success: { (json) in
+    //            guard let JSON = json as? [String: Any] else {
+    //                failure?(NetworkError.phraseFail(desc: "json is not a dictionary"))
+    //                return
+    //            }
+    //            OperationQueue.main.addOperation {
+    //                success?(JSON)
+    //            }
+    //        }, failure: failure)
+    //    }
+    
+    private func response(requestable: Requestable, responsable: Responsable?, success: ((_ JSON: Any) -> Void)?, failure: ((_ error: Error)->Void)?) {
         let request = Network.sessionManager.request(requestable.URI, method: requestable.method, parameters: requestable.parameters, encoding: requestable.encoding.encoder, headers: requestable.headers)
         let newRequest = delegate?.requestWillBegin(request: request) ?? request
         
         newRequest.responseJSON(queue: Network.queue, options: .allowFragments) { (response) in
-            
-            // 返回JSON失败
             guard response.error == nil else {failure?(response.error!); return}
-            
-            // 返回的不是json
-            guard let json = response.value as? [String: Any] else {failure?(NetworkError.serializeFail(desc: nil)); return}
-            
-            OperationQueue.main.addOperation {
+            if let keypath = responsable?.keyPath, !keypath.isEmpty {
+                guard let json = response.value as? [String: Any] else {
+                    failure?(NetworkError.serializeFail(desc: "json is not a dictionary, not valid for keypath:\(keypath)!"))
+                    return
+                }
+                guard let jsonObject = json[keypath] else {failure?(NetworkError.serializeFail(desc: "json[keypath] = nil"))
+                    return
+                }
+                success?(jsonObject)
+            } else {
+                guard let json = response.value else {
+                    failure?(NetworkError.serializeFail(desc: "response has no json"))
+                    return
+                }
                 success?(json)
             }
         }
     }
-    
-    
-    public func responseObject<R: ModelResponsable>(requestable: Requestable,
-                                                     responsable: R,
-                                                     success: ((_ obj: R.T) -> Void)?,
-                                                     failure: ((_ error: Error) ->Void)?) {
-
-        responseJSON(requestable: requestable, success: { json in
-            
-            var JSON: Any = json
-            
-            if let keypath = responsable.keyPath, !keypath.isEmpty {
-                guard let jsonObject = json[keypath] as? [String: Any] else {
-                    failure?(NetworkError.phraseFail(desc: "KeyPath error!"))
-                    return
-                }
-                JSON = jsonObject
-            }
-
-            guard let object = R.T(json: JSON) else {
-                failure?(NetworkError.phraseFail(desc: "Phrase Error!"))
-                return
-            }
-            
-            OperationQueue.main.addOperation {
-                success?(object)
-            }
-            
-        }, failure: failure)
-    }
-    
-    
-    public func responseArray<R: ModelResponsable>(requestable: Requestable,
-                                                   responsable: R,
-                                                   success: ((_ objs: [R.T]) -> Void)?,
-                                                   failure: ((_ error: Error) ->Void)?) {
-        
-        responseJSON(requestable: requestable, success: { json in
-            
-            var JSON: Any = json
-            
-            if let keypath = responsable.keyPath, !keypath.isEmpty {
-                guard let jsonObject = json[keypath] else {
-                    failure?(NetworkError.phraseFail(desc: "KeyPath error!"))
-                    return
-                }
-                JSON = jsonObject
-            }
-            
-            guard let jsons = JSON as? Array<[String: Any]> else {
-                failure?(NetworkError.phraseFail(desc: "Not an array!"))
-                return
-            }
-            
-            let objects = jsons.compactMap({R.T(json: $0)})
-            
-            OperationQueue.main.addOperation {
-                success?(objects)
-            }
-            
-        }, failure: failure)
-    }
 }
+
+
